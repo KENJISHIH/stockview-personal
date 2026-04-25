@@ -29,8 +29,21 @@ interface OhlcvBar {
 interface Props {
   symbol: string;
   market: Market;
-  days?: number;
 }
+
+type RangeKey = "1M" | "3M" | "6M" | "1Y";
+const RANGE_DAYS: Record<RangeKey, number> = {
+  "1M": 22,
+  "3M": 66,
+  "6M": 120,
+  "1Y": 250,
+};
+const RANGE_LABEL: Record<RangeKey, string> = {
+  "1M": "1月",
+  "3M": "3月",
+  "6M": "6月",
+  "1Y": "1年",
+};
 
 const RED_UP = "#ef4444"; // 漲
 const GREEN_DOWN = "#22c55e"; // 跌
@@ -76,7 +89,9 @@ function computeBB(
   return { upper, lower, middle };
 }
 
-function LightweightChartImpl({ symbol, market, days = 120 }: Props) {
+function LightweightChartImpl({ symbol, market }: Props) {
+  const [range, setRange] = useState<RangeKey>("6M");
+  const days = RANGE_DAYS[range];
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -87,7 +102,7 @@ function LightweightChartImpl({ symbol, market, days = 120 }: Props) {
   const bbLowerRef = useRef<ISeriesApi<"Line"> | null>(null);
 
   const [showMA, setShowMA] = useState(true);
-  const [showBB, setShowBB] = useState(true);
+  const [showBB, setShowBB] = useState(false);
   const [showVol, setShowVol] = useState(true);
 
   const { data, error, isLoading } = useSWR<{ bars: OhlcvBar[] }>(
@@ -233,13 +248,25 @@ function LightweightChartImpl({ symbol, market, days = 120 }: Props) {
 
   return (
     <div className="relative flex h-full w-full flex-col">
-      <div className="flex items-center gap-2 border-b border-border/50 px-3 py-2 text-xs">
-        <span className="text-muted-foreground">指標：</span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-b border-border/50 px-3 py-2 text-xs">
+        <span className="text-muted-foreground">期間：</span>
+        {(Object.keys(RANGE_LABEL) as RangeKey[]).map((k) => (
+          <Button
+            key={k}
+            variant={range === k ? "secondary" : "ghost"}
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={() => setRange(k)}
+          >
+            {RANGE_LABEL[k]}
+          </Button>
+        ))}
+        <span className="ml-3 text-muted-foreground">指標：</span>
         <Toggle on={showMA} onChange={setShowMA} color={MA_COLOR}>
           MA20
         </Toggle>
         <Toggle on={showBB} onChange={setShowBB} color={BB_UPPER}>
-          布林 BB(20,2)
+          布林
         </Toggle>
         <Toggle on={showVol} onChange={setShowVol}>
           成交量
