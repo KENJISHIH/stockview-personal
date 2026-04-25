@@ -4,6 +4,7 @@ import useSWR from "swr";
 import type { Quote, WatchlistItem } from "@/types";
 import { fetcher, SWR_OPTS } from "@/lib/swr";
 import { changeColorClass, formatChange, formatPercent, formatPrice } from "@/lib/format";
+import { TradingViewChart } from "@/components/TradingViewChart";
 
 interface Props {
   item: WatchlistItem | null;
@@ -64,8 +65,12 @@ export function StockDetail({ item }: Props) {
           />
         </div>
       )}
-      <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-        TradingView Advanced Chart Widget（Phase 3 嵌入）
+      <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border">
+        <TradingViewChart
+          key={`${item.market}:${item.symbol}`}
+          symbol={item.symbol}
+          market={item.market}
+        />
       </div>
     </div>
   );
