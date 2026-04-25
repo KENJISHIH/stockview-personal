@@ -63,6 +63,29 @@ export function removeFromWatchlist(symbol: string, market: WatchlistItem["marke
   return reindexed;
 }
 
+export function moveItem(
+  symbol: string,
+  market: WatchlistItem["market"],
+  direction: "up" | "down"
+): WatchlistItem[] {
+  const list = loadWatchlist();
+  // 只在同市場內排序
+  const sameMarket = list.filter((x) => x.market === market);
+  const others = list.filter((x) => x.market !== market);
+  const idx = sameMarket.findIndex((x) => x.symbol === symbol);
+  if (idx === -1) return list;
+  const swapWith = direction === "up" ? idx - 1 : idx + 1;
+  if (swapWith < 0 || swapWith >= sameMarket.length) return list;
+  [sameMarket[idx], sameMarket[swapWith]] = [sameMarket[swapWith], sameMarket[idx]];
+  // 整體重新編號（保持 TW → JP → US 順序）
+  const tw = [...sameMarket, ...others].filter((x) => x.market === "TW");
+  const jp = [...sameMarket, ...others].filter((x) => x.market === "JP");
+  const us = [...sameMarket, ...others].filter((x) => x.market === "US");
+  const merged = [...tw, ...jp, ...us].map((x, i) => ({ ...x, order: i + 1 }));
+  saveWatchlist(merged);
+  return merged;
+}
+
 export function resetWatchlist(): WatchlistItem[] {
   if (!isBrowser()) return WATCHLIST_SEED;
   window.localStorage.setItem(KEY, JSON.stringify(WATCHLIST_SEED));

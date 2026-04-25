@@ -13,7 +13,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen min-h-screen w-full flex-col">
-      <IndexBar />
+      <IndexBar onSearchPick={setSelected} />
       <div className="flex flex-1 overflow-hidden">
         <Watchlist
           selected={selected ? { symbol: selected.symbol, market: selected.market } : null}
