@@ -28,6 +28,7 @@ export interface DailyRow {
   close: number;
   change: number;
   changePct: number;
+  cumPct: number;
 }
 
 export interface DailySeries {
