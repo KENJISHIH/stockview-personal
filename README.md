@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# StockView Personal
 
-## Getting Started
+個人投資介面工具：桌機版的台美股觀察名單儀表板。
 
-First, run the development server:
+## 簡介
+
+解決三個痛點：
+1. 手機 App 切頁籤切到煩，個股要逐一點進去看
+2. 技術面在 TradingView、基本面要去 Yahoo / Goodinfo，資訊散落
+3.「最近 10 個工作天的收盤、每日漲幅、累積漲幅」這種快查 SaaS 做不到
+
+設計為**桌機 only**（1440px+），單人單機、無登入、零成本。
+
+## Stack
+
+| 層 | 技術 |
+|---|---|
+| 框架 | Next.js 16 (App Router) + TypeScript |
+| UI | shadcn/ui + Tailwind CSS v4 |
+| 圖表 | TradingView Advanced Chart Widget（embed） |
+| 台股資料 | FinMind（歷史/基本面）+ twstock（即時） |
+| 美股資料 | yahoo-finance2（Node 套件） |
+| 快取 | Vercel KV |
+| Watchlist 儲存 | localStorage |
+| 部署 | Vercel |
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
+# 填入：
+# FINMIND_TOKEN=...   FinMind 登入後取得（免費 600 calls/day）
+# KV_URL=...          Vercel KV 自動生成
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 啟動
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev    # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 測試
 
-## Learn More
+```bash
+npm run lint     # ESLint
+npx tsc --noEmit # TypeScript 型別檢查
+npm run build    # 生產 build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Phase 進度
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [x] Phase 0：專案骨架 + 三欄佈局 + watchlist seed
+- [ ] Phase 1：資料層 + 即時報價（FinMind / Yahoo Finance）
+- [ ] Phase 2：10 天收盤 + 漲幅表
+- [ ] Phase 3：TradingView K 線圖
+- [ ] Phase 4：基本面卡片
+- [ ] Phase 5：Watchlist 編輯 + 搜尋
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+詳細規劃見 `PLAN.md`。
