@@ -16,6 +16,20 @@ export function loadWatchlist(): WatchlistItem[] {
       return WATCHLIST_SEED;
     }
     const parsed = JSON.parse(raw) as WatchlistItem[];
+
+    // Seed merge：把 seed 內存在但 localStorage 缺少的項目補進來（順序接在後）
+    const existing = new Set(parsed.map((x) => `${x.market}:${x.symbol}`));
+    const missing = WATCHLIST_SEED.filter((s) => !existing.has(`${s.market}:${s.symbol}`));
+    if (missing.length > 0) {
+      const maxOrder = parsed.reduce((m, x) => Math.max(m, x.order), 0);
+      const merged = [
+        ...parsed,
+        ...missing.map((item, i) => ({ ...item, order: maxOrder + i + 1 })),
+      ];
+      window.localStorage.setItem(KEY, JSON.stringify(merged));
+      return merged.sort((a, b) => a.order - b.order);
+    }
+
     return parsed.sort((a, b) => a.order - b.order);
   } catch {
     return WATCHLIST_SEED;

@@ -61,6 +61,7 @@ async function resolveTwSymbol(symbol: string): Promise<string> {
 
 async function toYahooSymbol(symbol: string, market: Market): Promise<string> {
   if (market === "US") return symbol;
+  if (market === "JP") return `${symbol}.T`;
   return resolveTwSymbol(symbol);
 }
 
@@ -93,6 +94,9 @@ export async function fetchQuote(
 const INDEXES: { symbol: string; ySymbol: string; name: string }[] = [
   { symbol: "TAIEX", ySymbol: "^TWII", name: "加權指數" },
   { symbol: "OTC", ySymbol: "^TWOII", name: "櫃買指數" },
+  { symbol: "^N225", ySymbol: "^N225", name: "日經 225" },
+  // TOPIX 指數本身不在 Yahoo Finance（^TOPX/^TPX 都拉不到資料）
+  // 暫時不放，未來可考慮：(a) 用 1306.T TOPIX ETF 當代理 (b) 接 stooq/Investing.com
   { symbol: "^GSPC", ySymbol: "^GSPC", name: "S&P 500" },
   { symbol: "^IXIC", ySymbol: "^IXIC", name: "納斯達克" },
   { symbol: "^DJI", ySymbol: "^DJI", name: "道瓊" },

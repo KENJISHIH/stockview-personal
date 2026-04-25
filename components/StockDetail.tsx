@@ -23,7 +23,8 @@ export function StockDetail({ item }: Props) {
   }
 
   const colorCls = changeColorClass(quote?.change);
-  const exchangeLabel = item.market === "TW" ? "TWSE/TPEX" : "US";
+  const exchangeLabel =
+    item.market === "TW" ? "TWSE/TPEX" : item.market === "JP" ? "TSE 東京證交所" : "US";
 
   return (
     <div className="flex h-full flex-col gap-4 p-6">
@@ -84,6 +85,11 @@ function formatMarketCap(value: number, market: WatchlistItem["market"]): string
     if (value >= 1e12) return `${(value / 1e12).toFixed(2)}兆`;
     if (value >= 1e8) return `${(value / 1e8).toFixed(2)}億`;
     return value.toLocaleString("zh-TW");
+  }
+  if (market === "JP") {
+    if (value >= 1e12) return `¥${(value / 1e12).toFixed(2)}兆`;
+    if (value >= 1e8) return `¥${(value / 1e8).toFixed(2)}億`;
+    return `¥${value.toLocaleString("ja-JP")}`;
   }
   if (value >= 1e12) return `$${(value / 1e12).toFixed(2)}T`;
   if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;

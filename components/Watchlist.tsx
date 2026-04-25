@@ -17,6 +17,7 @@ export function Watchlist({ selected, onSelect }: Props) {
   const { byKey, isLoading } = useBatchQuotes(items);
 
   const tw = items.filter((x) => x.market === "TW");
+  const jp = items.filter((x) => x.market === "JP");
   const us = items.filter((x) => x.market === "US");
 
   return (
@@ -40,6 +41,20 @@ export function Watchlist({ selected, onSelect }: Props) {
               onSelect={onSelect}
             />
           ))}
+          {jp.length > 0 && (
+            <>
+              <div className="mt-3 px-2 py-1 text-xs font-medium text-muted-foreground">日股</div>
+              {jp.map((item) => (
+                <Row
+                  key={`${item.market}-${item.symbol}`}
+                  item={item}
+                  quote={byKey.get(quoteKey(item.symbol, item.market))}
+                  selected={selected?.symbol === item.symbol && selected?.market === item.market}
+                  onSelect={onSelect}
+                />
+              ))}
+            </>
+          )}
           <div className="mt-3 px-2 py-1 text-xs font-medium text-muted-foreground">美股</div>
           {us.map((item) => (
             <Row

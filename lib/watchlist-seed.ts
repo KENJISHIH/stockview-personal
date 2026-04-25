@@ -15,13 +15,16 @@ export const WATCHLIST_SEED: WatchlistItem[] = [
   { symbol: "3260", name: "威剛", market: "TW", order: 9, addedAt: NOW },
   { symbol: "6285", name: "啟碁", market: "TW", order: 10, addedAt: NOW },
 
+  // 日股
+  { symbol: "7011", name: "三菱重工", market: "JP", order: 11, addedAt: NOW },
+
   // 美股
-  { symbol: "MU", name: "Micron 美光", market: "US", order: 11, addedAt: NOW },
-  { symbol: "TSM", name: "TSMC ADR", market: "US", order: 12, addedAt: NOW },
-  { symbol: "AAPL", name: "Apple 蘋果", market: "US", order: 13, addedAt: NOW },
-  { symbol: "GOOGL", name: "Alphabet A", market: "US", order: 14, addedAt: NOW },
-  { symbol: "SPY", name: "S&P 500 ETF", market: "US", order: 15, addedAt: NOW },
-  { symbol: "RKLB", name: "Rocket Lab", market: "US", order: 16, addedAt: NOW },
-  { symbol: "ONDS", name: "Ondas Holdings", market: "US", order: 17, addedAt: NOW },
-  { symbol: "RCAT", name: "Red Cat Holdings", market: "US", order: 18, addedAt: NOW },
+  { symbol: "MU", name: "Micron 美光", market: "US", order: 12, addedAt: NOW },
+  { symbol: "TSM", name: "TSMC ADR", market: "US", order: 13, addedAt: NOW },
+  { symbol: "AAPL", name: "Apple 蘋果", market: "US", order: 14, addedAt: NOW },
+  { symbol: "GOOGL", name: "Alphabet A", market: "US", order: 15, addedAt: NOW },
+  { symbol: "SPY", name: "S&P 500 ETF", market: "US", order: 16, addedAt: NOW },
+  { symbol: "RKLB", name: "Rocket Lab", market: "US", order: 17, addedAt: NOW },
+  { symbol: "ONDS", name: "Ondas Holdings", market: "US", order: 18, addedAt: NOW },
+  { symbol: "RCAT", name: "Red Cat Holdings", market: "US", order: 19, addedAt: NOW },
 ];

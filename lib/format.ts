@@ -5,6 +5,9 @@ export function formatPrice(value: number | undefined, market?: Market): string 
   if (market === "TW") {
     return value.toLocaleString("zh-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
+  if (market === "JP") {
+    return `¥${value.toLocaleString("ja-JP", { maximumFractionDigits: 0 })}`;
+  }
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 

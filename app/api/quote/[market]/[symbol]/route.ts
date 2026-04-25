@@ -9,7 +9,7 @@ export async function GET(
   ctx: { params: Promise<{ market: string; symbol: string }> }
 ) {
   const { market, symbol } = await ctx.params;
-  if (market !== "TW" && market !== "US") {
+  if (market !== "TW" && market !== "JP" && market !== "US") {
     return NextResponse.json({ error: "Invalid market" }, { status: 400 });
   }
   try {

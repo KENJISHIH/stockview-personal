@@ -1,4 +1,4 @@
-export type Market = "TW" | "US";
+export type Market = "TW" | "JP" | "US";
 
 export interface WatchlistItem {
   symbol: string;
