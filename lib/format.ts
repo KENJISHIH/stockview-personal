@@ -1,6 +1,6 @@
 import type { Market } from "@/types";
 
-export function formatPrice(value: number | undefined, market: Market): string {
+export function formatPrice(value: number | undefined, market?: Market): string {
   if (value === undefined || value === null || Number.isNaN(value)) return "—";
   if (market === "TW") {
     return value.toLocaleString("zh-TW", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -21,15 +21,11 @@ export function formatChange(value: number | undefined, decimals = 2): string {
 }
 
 /**
- * 配色：台股紅漲綠跌，美股綠漲紅跌
+ * 配色：全市場統一採台股慣例（紅漲綠跌）。
  */
-export function changeColorClass(value: number | undefined, market: Market): string {
+export function changeColorClass(value: number | undefined): string {
   if (value === undefined || value === null || Number.isNaN(value) || value === 0) {
     return "text-muted-foreground";
   }
-  const isUp = value > 0;
-  if (market === "TW") {
-    return isUp ? "text-red-500" : "text-green-500";
-  }
-  return isUp ? "text-green-500" : "text-red-500";
+  return value > 0 ? "text-red-500" : "text-green-500";
 }

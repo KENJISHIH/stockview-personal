@@ -5,7 +5,6 @@ import { useWatchlist } from "@/lib/use-watchlist";
 import { useBatchQuotes, quoteKey } from "@/lib/use-quotes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { changeColorClass, formatPercent, formatPrice } from "@/lib/format";
 
 interface Props {
@@ -29,7 +28,7 @@ export function Watchlist({ selected, onSelect }: Props) {
         </span>
       </div>
       <Separator />
-      <ScrollArea className="flex-1">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-2 py-2">
           <div className="px-2 py-1 text-xs font-medium text-muted-foreground">台股</div>
           {tw.map((item) => (
@@ -52,7 +51,7 @@ export function Watchlist({ selected, onSelect }: Props) {
             />
           ))}
         </div>
-      </ScrollArea>
+      </div>
       <Separator />
       <div className="flex gap-2 p-3">
         <Button variant="outline" size="sm" className="flex-1" disabled>
@@ -77,7 +76,7 @@ function Row({
   selected: boolean;
   onSelect: (item: WatchlistItem) => void;
 }) {
-  const colorCls = changeColorClass(quote?.change, item.market);
+  const colorCls = changeColorClass(quote?.change);
 
   return (
     <button

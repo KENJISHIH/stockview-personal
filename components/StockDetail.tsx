@@ -22,7 +22,7 @@ export function StockDetail({ item }: Props) {
     );
   }
 
-  const colorCls = changeColorClass(quote?.change, item.market);
+  const colorCls = changeColorClass(quote?.change);
   const exchangeLabel = item.market === "TW" ? "TWSE/TPEX" : "US";
 
   return (

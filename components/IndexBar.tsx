@@ -5,13 +5,9 @@ import type { IndexQuote } from "@/types";
 import { fetcher, SWR_OPTS } from "@/lib/swr";
 import { formatPrice, formatPercent } from "@/lib/format";
 
-const TW_INDEX_SYMBOLS = new Set(["TAIEX", "OTC"]);
-
-function colorClass(value: number, isTw: boolean): string {
+function colorClass(value: number): string {
   if (!value) return "text-muted-foreground";
-  const isUp = value > 0;
-  if (isTw) return isUp ? "text-red-500" : "text-green-500";
-  return isUp ? "text-green-500" : "text-red-500";
+  return value > 0 ? "text-red-500" : "text-green-500";
 }
 
 export function IndexBar() {
@@ -29,21 +25,18 @@ export function IndexBar() {
         <span className="text-muted-foreground">載入指數中…</span>
       )}
       {error && <span className="text-red-500">指數讀取失敗</span>}
-      {indexes.map((idx) => {
-        const isTw = TW_INDEX_SYMBOLS.has(idx.symbol);
-        return (
-          <div
-            key={idx.symbol}
-            className="flex shrink-0 items-baseline gap-2 rounded px-3 py-2 hover:bg-muted/50"
-          >
-            <span className="text-muted-foreground">{idx.name}</span>
-            <span className="font-mono font-medium">{formatPrice(idx.price, "US")}</span>
-            <span className={`font-mono ${colorClass(idx.change, isTw)}`}>
-              {formatPercent(idx.changePct)}
-            </span>
-          </div>
-        );
-      })}
+      {indexes.map((idx) => (
+        <div
+          key={idx.symbol}
+          className="flex shrink-0 items-baseline gap-2 rounded px-3 py-2 hover:bg-muted/50"
+        >
+          <span className="text-muted-foreground">{idx.name}</span>
+          <span className="font-mono font-medium">{formatPrice(idx.price, "US")}</span>
+          <span className={`font-mono ${colorClass(idx.change)}`}>
+            {formatPercent(idx.changePct)}
+          </span>
+        </div>
+      ))}
       <div className="ml-auto shrink-0 text-muted-foreground">
         {data?.updatedAt && (
           <span className="rounded bg-muted px-2 py-1">
