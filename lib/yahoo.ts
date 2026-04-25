@@ -1,5 +1,5 @@
 import YahooFinance from "yahoo-finance2";
-import type { DailyRow, DailySeries, IndexQuote, Market, Quote } from "@/types";
+import type { DailyRow, DailySeries, Fundamental, IndexQuote, Market, Quote } from "@/types";
 
 // v3 預設 export 是 class，不再是 singleton
 const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
@@ -169,6 +169,70 @@ export async function fetchOhlcv(
 
   // 取最後 days 筆
   return bars.slice(-days);
+}
+
+interface RawSummary {
+  summaryDetail?: {
+    trailingPE?: number;
+    forwardPE?: number;
+    dividendYield?: number;
+    beta?: number;
+    marketCap?: number;
+    priceToBook?: number;
+  };
+  defaultKeyStatistics?: {
+    forwardPE?: number;
+    priceToBook?: number;
+    trailingEps?: number;
+    beta?: number;
+  };
+  financialData?: {
+    returnOnEquity?: number;
+    grossMargins?: number;
+    revenueGrowth?: number;
+    profitMargins?: number;
+  };
+}
+
+function toPct(v: number | undefined): number | undefined {
+  if (typeof v !== "number" || !Number.isFinite(v)) return undefined;
+  return v * 100;
+}
+
+function pickNumber(...vals: (number | undefined)[]): number | undefined {
+  for (const v of vals) {
+    if (typeof v === "number" && Number.isFinite(v)) return v;
+  }
+  return undefined;
+}
+
+export async function fetchFundamental(
+  symbol: string,
+  market: Market
+): Promise<Fundamental> {
+  const ySymbol = await toYahooSymbol(symbol, market);
+  const r = (await yahooFinance.quoteSummary(
+    ySymbol,
+    { modules: ["summaryDetail", "defaultKeyStatistics", "financialData"] },
+    { validateResult: false }
+  )) as RawSummary | null;
+
+  const sd = r?.summaryDetail ?? {};
+  const ks = r?.defaultKeyStatistics ?? {};
+  const fd = r?.financialData ?? {};
+
+  return {
+    pe: sd.trailingPE,
+    forwardPe: pickNumber(sd.forwardPE, ks.forwardPE),
+    pb: pickNumber(ks.priceToBook, sd.priceToBook),
+    roe: toPct(fd.returnOnEquity),
+    eps: ks.trailingEps,
+    dividendYield: toPct(sd.dividendYield),
+    grossMargin: toPct(fd.grossMargins),
+    revenueYoy: toPct(fd.revenueGrowth),
+    beta: pickNumber(sd.beta, ks.beta),
+    marketCap: sd.marketCap,
+  };
 }
 
 export async function fetchQuotesBatch(
