@@ -379,16 +379,16 @@ export interface Fundamental {
 |---|---|---|
 | Hosting | Vercel Hobby | $0 |
 | Vercel KV | 30k commands/month 免費額度 | $0 |
-| FinMind | 免費版 600 calls/day | $0 |
+| FinMind | 免費版 600 calls/**hour** | $0 |
 | Yahoo Finance | yahoo-finance2 套件免費 | $0 |
 | TradingView Widget | 免費 embed | $0 |
 | 網域 | 用 vercel.app 子網域即可 | $0 |
 | **合計** | | **$0** |
 
-**FinMind 額度估算**：
-- 18 檔 × 每 5 分鐘輪詢 1 次 = 216 calls/hour = 不夠
-- → 報價走 twstock（不限流）、FinMind 只用在歷史日線 + 基本面（1 day 快取）
-- 實際 FinMind 呼叫：開盤一次 18 檔 = 18 calls/day，遠低於 600
+**FinMind 額度估算（修正：免費 600/hour 不是 /day）**：
+- 18 檔 × 每 5 分鐘輪詢 1 次 = 216 calls/hour，**直接走 FinMind 也夠**
+- 但仍建議：報價走 twstock（無限流，更即時）、FinMind 用在歷史日線 + 基本面
+- 實際 FinMind 呼叫：開盤一次 18 檔 + 滾動 5min 快取 ≈ 50 calls/hour，使用率 ~8%
 
 ---
 

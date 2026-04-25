@@ -1,10 +1,12 @@
 "use client";
 
-import type { WatchlistItem } from "@/types";
+import type { Quote, WatchlistItem } from "@/types";
 import { useWatchlist } from "@/lib/use-watchlist";
+import { useBatchQuotes, quoteKey } from "@/lib/use-quotes";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { changeColorClass, formatPercent, formatPrice } from "@/lib/format";
 
 interface Props {
   selected: { symbol: string; market: WatchlistItem["market"] } | null;
@@ -13,6 +15,7 @@ interface Props {
 
 export function Watchlist({ selected, onSelect }: Props) {
   const items = useWatchlist();
+  const { byKey, isLoading } = useBatchQuotes(items);
 
   const tw = items.filter((x) => x.market === "TW");
   const us = items.filter((x) => x.market === "US");
@@ -21,7 +24,9 @@ export function Watchlist({ selected, onSelect }: Props) {
     <aside className="flex h-full w-72 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex items-center justify-between px-4 py-3">
         <h2 className="text-sm font-semibold">觀察名單</h2>
-        <span className="text-xs text-muted-foreground">{items.length} 檔</span>
+        <span className="text-xs text-muted-foreground">
+          {items.length} 檔{isLoading && byKey.size === 0 ? " · 載入中" : ""}
+        </span>
       </div>
       <Separator />
       <ScrollArea className="flex-1">
@@ -31,6 +36,7 @@ export function Watchlist({ selected, onSelect }: Props) {
             <Row
               key={`${item.market}-${item.symbol}`}
               item={item}
+              quote={byKey.get(quoteKey(item.symbol, item.market))}
               selected={selected?.symbol === item.symbol && selected?.market === item.market}
               onSelect={onSelect}
             />
@@ -40,6 +46,7 @@ export function Watchlist({ selected, onSelect }: Props) {
             <Row
               key={`${item.market}-${item.symbol}`}
               item={item}
+              quote={byKey.get(quoteKey(item.symbol, item.market))}
               selected={selected?.symbol === item.symbol && selected?.market === item.market}
               onSelect={onSelect}
             />
@@ -61,13 +68,17 @@ export function Watchlist({ selected, onSelect }: Props) {
 
 function Row({
   item,
+  quote,
   selected,
   onSelect,
 }: {
   item: WatchlistItem;
+  quote: Quote | undefined;
   selected: boolean;
   onSelect: (item: WatchlistItem) => void;
 }) {
+  const colorCls = changeColorClass(quote?.change, item.market);
+
   return (
     <button
       type="button"
@@ -80,7 +91,14 @@ function Row({
         <span className="font-medium">{item.name}</span>
         <span className="text-xs text-muted-foreground">{item.symbol}</span>
       </div>
-      <span className="text-xs text-muted-foreground">—</span>
+      <div className="flex flex-col items-end">
+        <span className={`font-mono text-sm ${colorCls}`}>
+          {quote ? formatPrice(quote.price, item.market) : "—"}
+        </span>
+        <span className={`font-mono text-xs ${colorCls}`}>
+          {quote ? formatPercent(quote.changePct) : "—"}
+        </span>
+      </div>
     </button>
   );
 }
