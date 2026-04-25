@@ -4,7 +4,7 @@ import useSWR from "swr";
 import type { Quote, WatchlistItem } from "@/types";
 import { fetcher, SWR_OPTS } from "@/lib/swr";
 import { changeColorClass, formatChange, formatPercent, formatPrice } from "@/lib/format";
-import { TradingViewChart } from "@/components/TradingViewChart";
+import { LightweightChart } from "@/components/LightweightChart";
 
 interface Props {
   item: WatchlistItem | null;
@@ -66,7 +66,7 @@ export function StockDetail({ item }: Props) {
         </div>
       )}
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border">
-        <TradingViewChart
+        <LightweightChart
           key={`${item.market}:${item.symbol}`}
           symbol={item.symbol}
           market={item.market}

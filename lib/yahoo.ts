@@ -120,6 +120,57 @@ export async function fetchIndexes(): Promise<IndexQuote[]> {
   });
 }
 
+/**
+ * 拉 OHLCV 給 K 線圖用，預設 120 個交易日（≈ 半年）
+ */
+export async function fetchOhlcv(
+  symbol: string,
+  market: Market,
+  days: number
+): Promise<OhlcvBar[]> {
+  const ySymbol = await toYahooSymbol(symbol, market);
+
+  // 抓 ~1.6 倍日曆日，扣掉週末和假日仍夠 days 個交易日
+  const period1 = new Date();
+  period1.setDate(period1.getDate() - Math.ceil(days * 1.6));
+
+  const result = (await yahooFinance.chart(
+    ySymbol,
+    { period1, interval: "1d" },
+    { validateResult: false }
+  )) as { quotes?: RawChartQuote[] } | null;
+
+  const bars = (result?.quotes ?? [])
+    .filter(
+      (q): q is RawChartQuote & {
+        open: number;
+        high: number;
+        low: number;
+        close: number;
+        volume: number;
+      } =>
+        typeof q.open === "number" &&
+        typeof q.high === "number" &&
+        typeof q.low === "number" &&
+        typeof q.close === "number" &&
+        typeof q.volume === "number"
+    )
+    .map<OhlcvBar>((q) => ({
+      date:
+        q.date instanceof Date
+          ? q.date.toISOString().slice(0, 10)
+          : String(q.date).slice(0, 10),
+      open: q.open,
+      high: q.high,
+      low: q.low,
+      close: q.close,
+      volume: q.volume,
+    }));
+
+  // 取最後 days 筆
+  return bars.slice(-days);
+}
+
 export async function fetchQuotesBatch(
   items: { symbol: string; market: Market; name?: string }[]
 ): Promise<Quote[]> {
@@ -139,8 +190,21 @@ export async function fetchQuotesBatch(
 
 interface RawChartQuote {
   date: Date | string;
+  open: number | null;
+  high: number | null;
+  low: number | null;
   close: number | null;
+  volume: number | null;
   adjclose?: number | null;
+}
+
+export interface OhlcvBar {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
 }
 
 /**
