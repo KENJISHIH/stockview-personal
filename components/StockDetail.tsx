@@ -5,12 +5,16 @@ import type { Quote, WatchlistItem } from "@/types";
 import { fetcher, SWR_OPTS } from "@/lib/swr";
 import { changeColorClass, formatChange, formatPercent, formatPrice } from "@/lib/format";
 import { LightweightChart } from "@/components/LightweightChart";
+import { Button } from "@/components/ui/button";
+import { useSectors } from "@/lib/use-sectors";
 
 interface Props {
   item: WatchlistItem | null;
+  onOpenPeerCompare: (args?: { groupId?: string; stock?: WatchlistItem }) => void;
 }
 
-export function StockDetail({ item }: Props) {
+export function StockDetail({ item, onOpenPeerCompare }: Props) {
+  const sectors = useSectors();
   const url = item ? `/api/quote/${item.market}/${encodeURIComponent(item.symbol)}` : null;
   const { data } = useSWR<{ quote: Quote }>(url, fetcher, SWR_OPTS);
   const quote = data?.quote;
@@ -27,13 +31,40 @@ export function StockDetail({ item }: Props) {
   const exchangeLabel =
     item.market === "TW" ? "TWSE/TPEX" : item.market === "JP" ? "TSE 東京證交所" : "US";
 
+  const memberGroups = sectors.filter((g) =>
+    g.members.some((m) => m.symbol === item.symbol && m.market === item.market)
+  );
+
   return (
     <div className="flex h-full flex-col gap-4 p-6">
-      <div>
-        <div className="text-sm text-muted-foreground">
-          {item.symbol} · {exchangeLabel}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-sm text-muted-foreground">
+            {item.symbol} · {exchangeLabel}
+          </div>
+          <div className="text-3xl font-semibold">{item.name}</div>
+          {memberGroups.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1 text-xs">
+              {memberGroups.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => onOpenPeerCompare({ groupId: g.id })}
+                  className="rounded bg-muted px-1.5 py-0.5 hover:bg-muted/70"
+                >
+                  📊 {g.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="text-3xl font-semibold">{item.name}</div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onOpenPeerCompare({ stock: item })}
+        >
+          📊 同業比價
+        </Button>
       </div>
       <div className="flex items-baseline gap-3">
         <span className="font-mono text-5xl font-semibold tabular-nums">

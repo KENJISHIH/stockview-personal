@@ -5,6 +5,7 @@ import type { IndexQuote, WatchlistItem } from "@/types";
 import { fetcher, SWR_OPTS } from "@/lib/swr";
 import { formatPrice, formatPercent } from "@/lib/format";
 import { SearchBox } from "@/components/SearchBox";
+import { Button } from "@/components/ui/button";
 
 function colorClass(value: number): string {
   if (!value) return "text-muted-foreground";
@@ -13,9 +14,10 @@ function colorClass(value: number): string {
 
 interface IndexBarProps {
   onSearchPick: (item: WatchlistItem) => void;
+  onOpenPeerCompare: () => void;
 }
 
-export function IndexBar({ onSearchPick }: IndexBarProps) {
+export function IndexBar({ onSearchPick, onOpenPeerCompare }: IndexBarProps) {
   const { data, error, isLoading } = useSWR<{ indexes: IndexQuote[]; updatedAt: string }>(
     "/api/index/global",
     fetcher,
@@ -27,6 +29,14 @@ export function IndexBar({ onSearchPick }: IndexBarProps) {
   return (
     <div className="flex h-14 items-center gap-2 overflow-x-auto border-b border-border bg-card px-4 text-xs">
       <SearchBox onPick={onSearchPick} />
+      <Button
+        variant="outline"
+        size="sm"
+        className="shrink-0"
+        onClick={onOpenPeerCompare}
+      >
+        📊 同業比價
+      </Button>
       <div className="flex flex-1 items-center gap-1 overflow-x-auto">
         {isLoading && indexes.length === 0 && (
           <span className="text-muted-foreground">載入指數中…</span>

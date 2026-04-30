@@ -60,3 +60,38 @@ export interface IndexQuote {
   change: number;
   changePct: number;
 }
+
+export interface SectorMember {
+  symbol: string;
+  name: string;
+  market: Market;
+}
+
+export interface SectorGroup {
+  id: string;
+  name: string;
+  members: SectorMember[];
+  templateId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SectorTemplate {
+  id: string;
+  name: string;
+  description: string;
+  members: SectorMember[];
+}
+
+export interface PeerRow {
+  symbol: string;
+  name: string;
+  market: Market;
+  price?: number;
+  changePct?: number;
+  eps?: number;
+  pe?: number;
+  forwardPe?: number;
+  marketCap?: number;
+  error?: string;
+}
