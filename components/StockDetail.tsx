@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import type { Quote, WatchlistItem } from "@/types";
+import type { Fundamental, Quote, WatchlistItem } from "@/types";
 import { fetcher, SWR_OPTS } from "@/lib/swr";
 import { changeColorClass, formatChange, formatPercent, formatPrice } from "@/lib/format";
 import { LightweightChart } from "@/components/LightweightChart";
@@ -18,6 +18,16 @@ export function StockDetail({ item, onOpenPeerCompare }: Props) {
   const url = item ? `/api/quote/${item.market}/${encodeURIComponent(item.symbol)}` : null;
   const { data } = useSWR<{ quote: Quote }>(url, fetcher, SWR_OPTS);
   const quote = data?.quote;
+
+  const fundUrl = item
+    ? `/api/fundamental/${item.market}/${encodeURIComponent(item.symbol)}`
+    : null;
+  const { data: fundData } = useSWR<{ fundamental: Fundamental }>(fundUrl, fetcher, SWR_OPTS);
+  const targetMean = fundData?.fundamental?.targetMeanPrice;
+  const targetDiff =
+    typeof targetMean === "number" && quote?.price
+      ? ((targetMean - quote.price) / quote.price) * 100
+      : undefined;
 
   if (!item) {
     return (
@@ -76,6 +86,17 @@ export function StockDetail({ item, onOpenPeerCompare }: Props) {
         <span className={`font-mono text-xl ${colorCls}`}>
           {quote ? `(${formatPercent(quote.changePct)})` : ""}
         </span>
+      </div>
+      <div className="flex items-baseline gap-2 text-sm">
+        <span className="text-muted-foreground">法人目標價</span>
+        <span className="font-mono tabular-nums">
+          {typeof targetMean === "number" ? formatPrice(targetMean, item.market) : "—"}
+        </span>
+        {typeof targetDiff === "number" && (
+          <span className={`font-mono ${changeColorClass(targetDiff)}`}>
+            ({formatPercent(targetDiff)})
+          </span>
+        )}
       </div>
       {quote && (
         <div className="grid grid-cols-3 gap-4 rounded border border-border p-3 text-sm sm:grid-cols-6">

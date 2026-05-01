@@ -51,6 +51,7 @@ export interface Fundamental {
   revenueYoy?: number;
   beta?: number;
   marketCap?: number;
+  targetMeanPrice?: number;
 }
 
 export interface IndexQuote {

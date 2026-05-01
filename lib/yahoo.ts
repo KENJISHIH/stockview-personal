@@ -191,6 +191,7 @@ interface RawSummary {
     grossMargins?: number;
     revenueGrowth?: number;
     profitMargins?: number;
+    targetMeanPrice?: number;
   };
 }
 
@@ -232,6 +233,7 @@ export async function fetchFundamental(
     revenueYoy: toPct(fd.revenueGrowth),
     beta: pickNumber(sd.beta, ks.beta),
     marketCap: sd.marketCap,
+    targetMeanPrice: pickNumber(fd.targetMeanPrice),
   };
 }
 
