@@ -47,7 +47,9 @@ const RANGE_LABEL: Record<RangeKey, string> = {
 
 const RED_UP = "#ef4444"; // 漲
 const GREEN_DOWN = "#22c55e"; // 跌
-const MA_COLOR = "#f59e0b";
+const MA5_COLOR = "#a78bfa";
+const MA10_COLOR = "#ec4899";
+const MA20_COLOR = "#f59e0b";
 const BB_UPPER = "#06b6d4";
 const BB_LOWER = "#06b6d4";
 const BB_MIDDLE = "#94a3b8";
@@ -96,12 +98,16 @@ function LightweightChartImpl({ symbol, market }: Props) {
   const chartRef = useRef<IChartApi | null>(null);
   const candleRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const ma5Ref = useRef<ISeriesApi<"Line"> | null>(null);
+  const ma10Ref = useRef<ISeriesApi<"Line"> | null>(null);
   const ma20Ref = useRef<ISeriesApi<"Line"> | null>(null);
   const bbUpperRef = useRef<ISeriesApi<"Line"> | null>(null);
   const bbMiddleRef = useRef<ISeriesApi<"Line"> | null>(null);
   const bbLowerRef = useRef<ISeriesApi<"Line"> | null>(null);
 
-  const [showMA, setShowMA] = useState(true);
+  const [showMA5, setShowMA5] = useState(false);
+  const [showMA10, setShowMA10] = useState(false);
+  const [showMA20, setShowMA20] = useState(true);
   const [showBB, setShowBB] = useState(false);
   const [showVol, setShowVol] = useState(true);
 
@@ -158,8 +164,20 @@ function LightweightChartImpl({ symbol, market }: Props) {
       scaleMargins: { top: 0.82, bottom: 0 },
     });
 
+    const ma5 = chart.addSeries(LineSeries, {
+      color: MA5_COLOR,
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    const ma10 = chart.addSeries(LineSeries, {
+      color: MA10_COLOR,
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
     const ma20 = chart.addSeries(LineSeries, {
-      color: MA_COLOR,
+      color: MA20_COLOR,
       lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
@@ -188,6 +206,8 @@ function LightweightChartImpl({ symbol, market }: Props) {
     chartRef.current = chart;
     candleRef.current = candle;
     volumeRef.current = volume;
+    ma5Ref.current = ma5;
+    ma10Ref.current = ma10;
     ma20Ref.current = ma20;
     bbUpperRef.current = bbUpper;
     bbMiddleRef.current = bbMiddle;
@@ -215,6 +235,8 @@ function LightweightChartImpl({ symbol, market }: Props) {
       color: b.close >= b.open ? "rgba(239, 68, 68, 0.4)" : "rgba(34, 197, 94, 0.4)",
     }));
     const closes = data.bars.map((b) => b.close);
+    const ma5Arr = computeMA(closes, 5);
+    const ma10Arr = computeMA(closes, 10);
     const ma20Arr = computeMA(closes, 20);
     const bb = computeBB(closes, 20, 2);
 
@@ -228,6 +250,8 @@ function LightweightChartImpl({ symbol, market }: Props) {
     return {
       candles,
       volumes,
+      ma5: toLine(ma5Arr),
+      ma10: toLine(ma10Arr),
       ma20: toLine(ma20Arr),
       bbUpper: toLine(bb.upper),
       bbMiddle: toLine(bb.middle),
@@ -239,12 +263,14 @@ function LightweightChartImpl({ symbol, market }: Props) {
     if (!seriesData) return;
     candleRef.current?.setData(seriesData.candles);
     volumeRef.current?.setData(showVol ? seriesData.volumes : []);
-    ma20Ref.current?.setData(showMA ? seriesData.ma20 : []);
+    ma5Ref.current?.setData(showMA5 ? seriesData.ma5 : []);
+    ma10Ref.current?.setData(showMA10 ? seriesData.ma10 : []);
+    ma20Ref.current?.setData(showMA20 ? seriesData.ma20 : []);
     bbUpperRef.current?.setData(showBB ? seriesData.bbUpper : []);
     bbMiddleRef.current?.setData(showBB ? seriesData.bbMiddle : []);
     bbLowerRef.current?.setData(showBB ? seriesData.bbLower : []);
     chartRef.current?.timeScale().fitContent();
-  }, [seriesData, showMA, showBB, showVol]);
+  }, [seriesData, showMA5, showMA10, showMA20, showBB, showVol]);
 
   return (
     <div className="relative flex h-full w-full flex-col">
@@ -262,7 +288,13 @@ function LightweightChartImpl({ symbol, market }: Props) {
           </Button>
         ))}
         <span className="ml-3 text-muted-foreground">指標：</span>
-        <Toggle on={showMA} onChange={setShowMA} color={MA_COLOR}>
+        <Toggle on={showMA5} onChange={setShowMA5} color={MA5_COLOR}>
+          MA5
+        </Toggle>
+        <Toggle on={showMA10} onChange={setShowMA10} color={MA10_COLOR}>
+          MA10
+        </Toggle>
+        <Toggle on={showMA20} onChange={setShowMA20} color={MA20_COLOR}>
           MA20
         </Toggle>
         <Toggle on={showBB} onChange={setShowBB} color={BB_UPPER}>
