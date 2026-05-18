@@ -84,6 +84,42 @@ export interface SectorTemplate {
   members: SectorMember[];
 }
 
+export interface EarningsHistoryRow {
+  quarter: string;
+  epsActual?: number;
+  epsEstimate?: number;
+  surprisePercent?: number;
+}
+
+export interface Earnings {
+  nextEarningsDate?: string;
+  isNextEstimate?: boolean;
+  nextEpsEstimate?: number;
+  nextEpsLow?: number;
+  nextEpsHigh?: number;
+  nextRevenueEstimate?: number;
+  history: EarningsHistoryRow[];
+}
+
+export interface InstitutionHolder {
+  name: string;
+  reportDate: string;
+  position: number;
+  pctChange?: number;
+}
+
+export interface Holders {
+  institutionsPercentHeld?: number;
+  institutionsFloatPercentHeld?: number;
+  insidersPercentHeld?: number;
+  institutionsCount?: number;
+  topInstitutions: InstitutionHolder[];
+  netInstBuyingPercent?: number;
+  netPercentInsiderShares?: number;
+  netInstSharesBuying?: number;
+  period?: string;
+}
+
 export interface PeerRow {
   symbol: string;
   name: string;

@@ -7,6 +7,8 @@ import { Watchlist } from "@/components/Watchlist";
 import { StockDetail } from "@/components/StockDetail";
 import { TenDayTable } from "@/components/TenDayTable";
 import { FundamentalCard } from "@/components/FundamentalCard";
+import { HoldersCard } from "@/components/HoldersCard";
+import { EarningsCard } from "@/components/EarningsCard";
 import { PeerCompareDialog } from "@/components/PeerCompareDialog";
 
 export default function Dashboard() {
@@ -35,6 +37,8 @@ export default function Dashboard() {
         <aside className="flex w-[26rem] shrink-0 flex-col overflow-auto border-l border-border bg-card">
           <TenDayTable item={selected} />
           <FundamentalCard item={selected} />
+          <EarningsCard item={selected} />
+          <HoldersCard item={selected} />
         </aside>
       </div>
       <div className="flex h-6 items-center justify-between border-t border-border bg-card px-4 text-[10px] text-muted-foreground">

@@ -1,5 +1,16 @@
 import YahooFinance from "yahoo-finance2";
-import type { DailyRow, DailySeries, Fundamental, IndexQuote, Market, Quote } from "@/types";
+import type {
+  DailyRow,
+  DailySeries,
+  Earnings,
+  EarningsHistoryRow,
+  Fundamental,
+  Holders,
+  IndexQuote,
+  InstitutionHolder,
+  Market,
+  Quote,
+} from "@/types";
 
 // v3 預設 export 是 class，不再是 singleton
 const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
@@ -234,6 +245,125 @@ export async function fetchFundamental(
     beta: pickNumber(sd.beta, ks.beta),
     marketCap: sd.marketCap,
     targetMeanPrice: pickNumber(fd.targetMeanPrice),
+  };
+}
+
+interface RawHoldersSummary {
+  majorHoldersBreakdown?: {
+    insidersPercentHeld?: number;
+    institutionsPercentHeld?: number;
+    institutionsFloatPercentHeld?: number;
+    institutionsCount?: number;
+  };
+  institutionOwnership?: {
+    ownershipList?: {
+      organization?: string;
+      reportDate?: Date | string;
+      position?: number;
+      pctChange?: number;
+    }[];
+  };
+  netSharePurchaseActivity?: {
+    period?: string;
+    netInstSharesBuying?: number;
+    netInstBuyingPercent?: number;
+    netPercentInsiderShares?: number;
+  };
+}
+
+function toDateStr(v: Date | string | undefined): string {
+  if (!v) return "";
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  return String(v).slice(0, 10);
+}
+
+export async function fetchHolders(symbol: string, market: Market): Promise<Holders> {
+  const ySymbol = await toYahooSymbol(symbol, market);
+  const modules =
+    market === "US"
+      ? (["majorHoldersBreakdown", "institutionOwnership", "netSharePurchaseActivity"] as const)
+      : (["majorHoldersBreakdown"] as const);
+
+  const r = (await yahooFinance.quoteSummary(
+    ySymbol,
+    { modules: modules as unknown as "majorHoldersBreakdown"[] },
+    { validateResult: false }
+  )) as RawHoldersSummary | null;
+
+  const mh = r?.majorHoldersBreakdown ?? {};
+  const list = r?.institutionOwnership?.ownershipList ?? [];
+  const net = r?.netSharePurchaseActivity ?? {};
+
+  const topInstitutions: InstitutionHolder[] = list
+    .filter((x) => typeof x.position === "number" && typeof x.organization === "string")
+    .map((x) => ({
+      name: x.organization as string,
+      reportDate: toDateStr(x.reportDate),
+      position: x.position as number,
+      pctChange: pickNumber(x.pctChange),
+    }));
+
+  return {
+    institutionsPercentHeld: pickNumber(mh.institutionsPercentHeld),
+    institutionsFloatPercentHeld: pickNumber(mh.institutionsFloatPercentHeld),
+    insidersPercentHeld: pickNumber(mh.insidersPercentHeld),
+    institutionsCount: pickNumber(mh.institutionsCount),
+    topInstitutions,
+    netInstBuyingPercent: pickNumber(net.netInstBuyingPercent),
+    netPercentInsiderShares: pickNumber(net.netPercentInsiderShares),
+    netInstSharesBuying: pickNumber(net.netInstSharesBuying),
+    period: net.period,
+  };
+}
+
+interface RawEarningsSummary {
+  calendarEvents?: {
+    earnings?: {
+      earningsDate?: (Date | string)[];
+      isEarningsDateEstimate?: boolean;
+      earningsAverage?: number;
+      earningsLow?: number;
+      earningsHigh?: number;
+      revenueAverage?: number;
+    };
+  };
+  earningsHistory?: {
+    history?: {
+      quarter?: Date | string;
+      epsActual?: number;
+      epsEstimate?: number;
+      surprisePercent?: number;
+    }[];
+  };
+}
+
+export async function fetchEarnings(symbol: string, market: Market): Promise<Earnings> {
+  const ySymbol = await toYahooSymbol(symbol, market);
+  const r = (await yahooFinance.quoteSummary(
+    ySymbol,
+    { modules: ["calendarEvents", "earningsHistory"] },
+    { validateResult: false }
+  )) as RawEarningsSummary | null;
+
+  const ce = r?.calendarEvents?.earnings ?? {};
+  const dates = ce.earningsDate ?? [];
+  const history: EarningsHistoryRow[] = (r?.earningsHistory?.history ?? [])
+    .filter((x) => x.quarter)
+    .map((x) => ({
+      quarter: toDateStr(x.quarter),
+      epsActual: pickNumber(x.epsActual),
+      epsEstimate: pickNumber(x.epsEstimate),
+      surprisePercent: pickNumber(x.surprisePercent),
+    }));
+
+  return {
+    nextEarningsDate: dates.length > 0 ? toDateStr(dates[0]) : undefined,
+    isNextEstimate: ce.isEarningsDateEstimate,
+    nextEpsEstimate: pickNumber(ce.earningsAverage),
+    nextEpsLow: pickNumber(ce.earningsLow),
+    nextEpsHigh: pickNumber(ce.earningsHigh),
+    nextRevenueEstimate: pickNumber(ce.revenueAverage),
+    history,
   };
 }
 
