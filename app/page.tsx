@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { WatchlistItem } from "@/types";
 import { IndexBar } from "@/components/IndexBar";
 import { Watchlist } from "@/components/Watchlist";
@@ -43,7 +44,12 @@ export default function Dashboard() {
       </div>
       <div className="flex h-6 items-center justify-between border-t border-border bg-card px-4 text-[10px] text-muted-foreground">
         <span>StockView Personal · Phase 0 殼</span>
-        <span>1024px 以下請改用桌機</span>
+        <div className="flex items-center gap-4">
+          <Link href="/opportunity-cost" className="hover:text-foreground">
+            💰 機會成本計算機
+          </Link>
+          <span>1024px 以下請改用桌機</span>
+        </div>
       </div>
       <PeerCompareDialog
         open={peerOpen}
